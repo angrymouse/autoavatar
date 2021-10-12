@@ -1,0 +1,14 @@
+{
+  "name": "autoavatar",
+  "version": "1.0.0",
+  "description": "Tool to automaticlly make avatars",
+  "main": "index.js",
+  "repository": "https://github.com/angrymouse/autoavatar",
+  "author": "Angrymouse",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "sharp": "^0.29.1"
+  }
+}

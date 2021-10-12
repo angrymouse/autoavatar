@@ -1,0 +1,6 @@
+
+<svg>
+<rect y="0" x="0" class="st0" width="1024" height="190"  fill="#00000000" />
+<text  class="st1 st2" font-size="180" fill="#fff" font-family="Impact"><%=username%></text>
+<rect x="0" y="0" class="st0" width="10" height="190"  fill="#00000000" />
+</svg>
