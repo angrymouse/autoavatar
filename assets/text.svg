@@ -1,7 +1,7 @@
-<svg width="110%">
+<svg width="110%" height="200px">
 
-    <rect x="0" y="0" width="100%" height="150" fill="#00000099" class="rect"/>
-    <text x="5%" y="120" font-size="120" fill="#fff" font-family="Impact"  ><%=username%></text>
+    <rect x="0" y="0" width="100%" height="200px" fill="#00000099" class="rect"/>
+    <text x="5%" y="140px" font-size="120" fill="#fff" font-family="Impact"  ><%=username%></text>
 
 
   </svg>

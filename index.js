@@ -3,6 +3,7 @@
 	let ejs = require("ejs");
 	let crypto = require("crypto");
 	let elementsOnScreen = 4;
+	let fetch = (await import("node-fetch")).default;
 	let sharp = require("sharp");
 	let avatar = sharp({
 		create: {
@@ -55,59 +56,85 @@
 		"difference",
 		// "exclusion",
 	];
-	let emojis = await Promise.all(
-		new Array(150)
-			.fill(async () => {
-				let left = crypto.randomInt(1024);
-				return {
-					input: await sharp(
-						"./assets/emoji/" + crypto.randomInt(3576) + ".svg"
-					).toBuffer(),
-					top: crypto.randomInt(
-						crypto.randomInt(10, 100) + Math.abs(512 - left)
-					),
-					left: left,
-					density: crypto.randomInt(40, 120),
-					blend: blends[Math.round(Math.random() * blends.length)],
-				};
-			})
-			.map(async (e) => await e())
-	);
+
 	let bottomEmojis = [];
 	let y = 512;
 	let EDF = crypto.randomInt(3570);
 	let EDT = crypto.randomInt(EDF, 3576);
-	for (let x = 24; y < 1000; x += 50) {
-		if (x > 1000) {
-			x = 0;
-			y += 50;
-		}
-		bottomEmojis.push({
-			input: await sharp(
-				"./assets/emoji/" + crypto.randomInt(EDF, EDT) + ".svg"
-			).toBuffer(),
-			top: y,
-			left: x,
-		});
-	}
+	// for (let x = 0; y < 1024; x += 20) {
+	// 	if (x > 1000) {
+	// 		x = 0;
+	// 		y += 20;
+	// 	}
+	// 	bottomEmojis.push({
+	// 		input: await sharp(
+	// 			"./assets/emoji/" + crypto.randomInt(EDF, EDT) + ".svg",
+	// 			{ density: 30 }
+	// 		).toBuffer(),
+	// 		top: y,
+	// 		left: x,
+	// 	});
+	// }
+
+	let cat = await (
+		await fetch(`https://robohash.org/${username}.png?set=set4&size=200x200`)
+	).buffer();
+	let paths = new Array(crypto.randomInt(5, 20))
+		.fill(() => {
+			let g = `M${crypto.randomInt(0, 1024)} ${crypto.randomInt(0, 1024)} L `;
+
+			let lines = new Array(crypto.randomInt(3, 15))
+				.fill(() => {
+					let posX = crypto.randomInt(0, 1024);
+					let posY = crypto.randomInt(0, 1024);
+					return (
+						posX +
+						crypto.randomInt(-30, 30) +
+						" " +
+						(posY + crypto.randomInt(-30, 30))
+					);
+				})
+				.map((e) => e())
+				.join(" L ");
+			g += lines + " Z";
+			return {
+				g,
+				color:
+					"#" +
+					crypto.randomInt(0x00, 0xff).toString(16) +
+					crypto.randomInt(0x00, 0xff).toString(16) +
+					crypto.randomInt(0x00, 0xff).toString(16) +
+					crypto.randomInt(0x00, 0xff).toString(16),
+			};
+		})
+		.map((e) => e());
+	let usernameSprite = await sharp(
+		Buffer.from(await ejs.renderFile("./assets/text.svg", { username }))
+	);
+
 	await avatar.composite([
 		{ input: bg },
-		...emojis,
+		// ...emojis,
+		{
+			input: Buffer.from(await ejs.renderFile("./assets/ex.svg", { paths })),
+		},
 		...inputs.map((i) => ({
 			input: i,
-			left: crypto.randomInt(-300, 300),
-			top: crypto.randomInt(-300, 300),
+			left: crypto.randomInt(-300, 500),
+			top: crypto.randomInt(-300, 500),
 			blend: blends[Math.round(Math.random() * blends.length)],
 		})),
-		...bottomEmojis,
+
 		{
-			input: Buffer.from(
-				await ejs.renderFile("./assets/text.svg", { username })
-			),
+			input: cat,
+			left: 412,
+			top: 512 - (await usernameSprite.metadata()).height / 2 - 190,
+		},
+
+		{
+			input: await usernameSprite.toBuffer(),
 		},
 	]);
-	if (fs.existsSync("./avatar.png")) {
-		fs.unlinkSync("./avatar.png");
-	}
-	await avatar.png().toFile("./avatar.png");
+
+	fs.writeFileSync("avatar.png", await avatar.png().toBuffer());
 })();
